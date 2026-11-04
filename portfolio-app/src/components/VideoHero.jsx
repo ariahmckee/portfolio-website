@@ -49,7 +49,7 @@ export default function VideoHero({
             poster={poster}
             onError={() => setVideoFailed(true)}
           >
-            {sources.desktop ? <source src={sources.desktop} type="video/webm" media="(min-width: 1100px)" /> : null}
+            {sources.desktop ? <source src={sources.desktop} type="video/webm" media="(min-width: 1200px)" /> : null}
             {sources.standard ? <source src={sources.standard} type="video/webm" media="(min-width: 700px)" /> : null}
             {sources.mobile ? <source src={sources.mobile} type="video/webm" media="(max-width: 699px)" /> : null}
             <source src={fallbackSource} type="video/webm" />

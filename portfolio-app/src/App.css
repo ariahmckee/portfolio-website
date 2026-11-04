@@ -13,6 +13,7 @@
   --eye-color: #61676d;
   --page-content-width: 80%;
   --portfolio-background: #303337;
+  --header-height: 68px;
 }
 
 * {
@@ -45,7 +46,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body.home-page {
@@ -96,6 +98,7 @@ p {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-height: var(--header-height);
   padding: 10px;
   width: var(--page-content-width);
   background-color: var(--color-white);
@@ -232,7 +235,11 @@ header .navigation li a,
 }
 
 .discipline-marquee {
-  margin-top: 0;
+  margin-top: auto;
+  margin-bottom: 0;
+  width: min(100%, var(--page-content-width));
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .portfolio-page {
@@ -261,7 +268,9 @@ header .navigation li a,
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-  width: 100%;
+  width: min(100%, var(--page-content-width));
+  margin: 5rem auto 0;
+  padding-bottom: 4rem;
 }
 
 .video-hero {
@@ -269,6 +278,8 @@ header .navigation li a,
   --video-hero-min-height: 360px;
   --video-hero-video-max-height: 620px;
   --video-hero-content-max-width: 32rem;
+  --video-hero-media-offset-y: 0px;
+  --video-hero-text-offset-y: 0px;
   position: relative;
   display: grid;
   grid-template-columns: var(--video-hero-columns);
@@ -276,9 +287,8 @@ header .navigation li a,
   gap: 1.5rem;
   width: 100%;
   min-height: var(--video-hero-min-height);
-  margin: -0.5rem 0 1.5rem;
+  margin: 0 0 1.5rem;
 }
-
 .video-hero--media-right {
   --video-hero-columns: minmax(0, 1fr) minmax(0, 1.3fr);
 }
@@ -299,6 +309,7 @@ header .navigation li a,
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  transform: translateY(var(--video-hero-media-offset-y));
 }
 
 .video-hero__video,
@@ -315,6 +326,8 @@ header .navigation li a,
   position: relative;
   z-index: 1;
   max-width: var(--video-hero-content-max-width);
+  padding-inline: clamp(0.25rem, 1vw, 1rem);
+  transform: translateY(var(--video-hero-text-offset-y));
 }
 
 .video-hero__content h2 {
@@ -333,10 +346,30 @@ header .navigation li a,
   max-width: 32rem;
 }
 
+.bim-viewport-hero {
+  position: relative;
+  width: 100%;
+  min-height: calc(100svh - var(--header-height));
+  margin-top: calc(-1 * var(--header-height));
+  padding-top: var(--header-height);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: end;
+  overflow: visible;
+  z-index: 0;
+}
+
 .bim-video-hero {
-  --video-hero-video-max-height: 700px;
-  --video-hero-min-height: 300px;
-  padding: 0 0 0.5rem;
+  --video-hero-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  --video-hero-video-max-height: clamp(640px, 72vh, 1840px);
+  --video-hero-min-height: 270px;
+  --video-hero-content-max-width: 30rem;
+  --video-hero-media-offset-y: -4.2rem;
+  --video-hero-text-offset-y: 3.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
 }
 
 .project-card {
@@ -526,6 +559,28 @@ header .navigation li a,
 
   .video-hero__content {
     max-width: none;
+    padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  .bim-viewport-hero {
+    min-height: clamp(420px, 72svh, 720px);
+    margin-top: 0;
+    padding-top: 0;
+    grid-template-rows: auto auto;
+  }
+
+  .bim-video-hero {
+    --video-hero-columns: 1fr;
+    --video-hero-media-offset-y: 0px;
+    --video-hero-text-offset-y: 0px;
+    --video-hero-video-max-height: clamp(240px, 40svh, 500px);
+    width: 100%;
+    margin-top: 0;
+    padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  .project-grid {
+    margin-top: 3rem;
   }
 
   .menu-toggle {

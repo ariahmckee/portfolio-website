@@ -2,6 +2,7 @@
 
 export default function TechMarquee({ items = [], className = '', animated = true }) {
   const trackRef = useRef(null)
+  const marqueeRef = useRef(null)
   const firstSetRef = useRef(null)
   const offsetRef = useRef(0)
   const maxScrollRef = useRef(0)
@@ -14,7 +15,8 @@ export default function TechMarquee({ items = [], className = '', animated = tru
 
     const track = trackRef.current
     const firstSet = firstSetRef.current
-    if (!track || !firstSet || items.length === 0) return undefined
+    const marquee = marqueeRef.current
+    if (!track || !firstSet || !marquee || items.length === 0) return undefined
 
     const updateLayout = () => {
       maxScrollRef.current = firstSet.offsetWidth
@@ -22,6 +24,28 @@ export default function TechMarquee({ items = [], className = '', animated = tru
 
       offsetRef.current = ((offsetRef.current % maxScrollRef.current) + maxScrollRef.current) % maxScrollRef.current
       track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`
+    }
+
+    const handleWheel = (event) => {
+      if (!animated) return
+      const targetTrack = trackRef.current
+      if (!targetTrack) return
+
+      if (event.cancelable) {
+        event.preventDefault()
+      }
+
+      const maxScroll = maxScrollRef.current || targetTrack.scrollWidth / 2
+      if (maxScroll <= 0) return
+
+      const delta = event.deltaY * 0.35
+      offsetRef.current += delta
+
+      while (offsetRef.current < 0) offsetRef.current += maxScroll
+      while (offsetRef.current >= maxScroll) offsetRef.current -= maxScroll
+
+      targetTrack.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`
+      lastTimestampRef.current = performance.now()
     }
 
     const animate = (timestamp) => {
@@ -41,32 +65,14 @@ export default function TechMarquee({ items = [], className = '', animated = tru
     lastTimestampRef.current = performance.now()
     animationFrameRef.current = window.requestAnimationFrame(animate)
     window.addEventListener('resize', updateLayout)
+    marquee.addEventListener('wheel', handleWheel, { passive: false })
 
     return () => {
       window.cancelAnimationFrame(animationFrameRef.current)
       window.removeEventListener('resize', updateLayout)
+      marquee.removeEventListener('wheel', handleWheel)
     }
   }, [animated, items])
-
-  const handleWheel = (event) => {
-    if (!animated) return
-
-    const track = trackRef.current
-    if (!track) return
-
-    event.preventDefault()
-    const maxScroll = maxScrollRef.current || track.scrollWidth / 2
-    if (maxScroll <= 0) return
-
-    const delta = event.deltaY * 0.35
-    offsetRef.current += delta
-
-    while (offsetRef.current < 0) offsetRef.current += maxScroll
-    while (offsetRef.current >= maxScroll) offsetRef.current -= maxScroll
-
-    track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`
-    lastTimestampRef.current = performance.now()
-  }
 
   if (!animated) {
     return (
@@ -84,6 +90,7 @@ export default function TechMarquee({ items = [], className = '', animated = tru
 
   return (
     <div
+      ref={marqueeRef}
       className={`companies ${className}`.trim()}
       onMouseEnter={() => {
         hoveringRef.current = true
@@ -91,7 +98,6 @@ export default function TechMarquee({ items = [], className = '', animated = tru
       onMouseLeave={() => {
         hoveringRef.current = false
       }}
-      onWheel={handleWheel}
     >
       <div className="scroll-track" ref={trackRef}>
         <div className="set" ref={firstSetRef}>
