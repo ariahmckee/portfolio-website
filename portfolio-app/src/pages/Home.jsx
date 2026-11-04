@@ -4,7 +4,7 @@ import { startupBrandIcons } from '../data/projects'
 
 export default function Home() {
   return (
-    <main className="content" id="top">
+    <main className="content page-container" id="top">
       <Hero />
 
       <article id="worked-with" className="worked-with">

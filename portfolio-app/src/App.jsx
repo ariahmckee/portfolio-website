@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react'
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import './App.css'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -16,9 +16,20 @@ const socialLinks = [
 ]
 
 function App() {
+  const location = useLocation()
+  const isHomePage = location.pathname === '/'
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
   const headerBoxRef = useRef(null)
+
+  useEffect(() => {
+    document.body.classList.toggle('home-page', isHomePage)
+    document.body.classList.toggle('portfolio-page', !isHomePage)
+
+    return () => {
+      document.body.classList.remove('home-page', 'portfolio-page')
+    }
+  }, [isHomePage])
 
   useEffect(() => {
     const handleDocumentClick = (event) => {
@@ -48,7 +59,6 @@ function App() {
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
         contactOpen={contactOpen}
-        setContactOpen={setContactOpen}
         headerBoxRef={headerBoxRef}
         handleNavClick={handleNavClick}
         handleContactToggle={handleContactToggle}
@@ -58,8 +68,10 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/software-engineering" element={<SoftwareEngineering />} />
+        <Route path="/software-engineering/projects/:projectId" element={<ProjectDetail discipline="software-engineering" />} />
         <Route path="/bim-vdc" element={<BIMVDC />} />
-        <Route path="/projects/:projectId" element={<ProjectDetail />} />
+        <Route path="/bim-vdc/projects/:projectId" element={<ProjectDetail discipline="bim-vdc" />} />
+        <Route path="*" element={<main className="portfolio-page"><h1>Page not found</h1></main>} />
       </Routes>
 
       <Footer />

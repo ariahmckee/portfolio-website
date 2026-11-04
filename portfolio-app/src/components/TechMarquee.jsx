@@ -1,6 +1,6 @@
 ﻿import { useEffect, useRef } from 'react'
 
-export default function TechMarquee({ items = [], className = '' }) {
+export default function TechMarquee({ items = [], className = '', animated = true }) {
   const trackRef = useRef(null)
   const firstSetRef = useRef(null)
   const offsetRef = useRef(0)
@@ -10,6 +10,8 @@ export default function TechMarquee({ items = [], className = '' }) {
   const hoveringRef = useRef(false)
 
   useEffect(() => {
+    if (!animated) return undefined
+
     const track = trackRef.current
     const firstSet = firstSetRef.current
     if (!track || !firstSet || items.length === 0) return undefined
@@ -44,9 +46,11 @@ export default function TechMarquee({ items = [], className = '' }) {
       window.cancelAnimationFrame(animationFrameRef.current)
       window.removeEventListener('resize', updateLayout)
     }
-  }, [items])
+  }, [animated, items])
 
   const handleWheel = (event) => {
+    if (!animated) return
+
     const track = trackRef.current
     if (!track) return
 
@@ -62,6 +66,20 @@ export default function TechMarquee({ items = [], className = '' }) {
 
     track.style.transform = `translate3d(${-offsetRef.current}px, 0, 0)`
     lastTimestampRef.current = performance.now()
+  }
+
+  if (!animated) {
+    return (
+      <div className={`companies static-companies ${className}`.trim()}>
+        <div className="static-track">
+          {items.map((item) => (
+            <a key={item.id} href={item.href || 'https://www.example.com'} aria-label={`${item.label || item.id} brand logo`}>
+              <i className={item.icon} />
+            </a>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
