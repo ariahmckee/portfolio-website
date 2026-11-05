@@ -349,27 +349,38 @@ header .navigation li a,
 .bim-viewport-hero {
   position: relative;
   width: 100%;
-  min-height: calc(100svh - var(--header-height));
+  min-height: calc(100svh - var(--header-height) - 82px);
   margin-top: calc(-1 * var(--header-height));
   padding-top: var(--header-height);
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  align-items: end;
+  padding-bottom: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
   overflow: visible;
   z-index: 0;
 }
 
 .bim-video-hero {
   --video-hero-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-  --video-hero-video-max-height: clamp(640px, 72vh, 1840px);
-  --video-hero-min-height: 270px;
+  --video-hero-video-max-height: clamp(320px, 52vh, 560px);
+  --video-hero-min-height: 180px;
   --video-hero-content-max-width: 30rem;
-  --video-hero-media-offset-y: -4.2rem;
-  --video-hero-text-offset-y: 3.5rem;
+  --video-hero-media-offset-y: 0px;
+  --video-hero-text-offset-y: 0px;
   width: 100%;
   margin: 0;
   padding: 0;
   z-index: 1;
+  flex: 0 0 auto;
+}
+
+.bim-viewport-hero .discipline-marquee {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .project-card {
@@ -563,20 +574,25 @@ header .navigation li a,
   }
 
   .bim-viewport-hero {
-    min-height: clamp(420px, 72svh, 720px);
+    min-height: clamp(560px, 80svh, 760px);
     margin-top: 0;
     padding-top: 0;
-    grid-template-rows: auto auto;
+    padding-bottom: 110px;
+    justify-content: flex-start;
   }
 
   .bim-video-hero {
     --video-hero-columns: 1fr;
     --video-hero-media-offset-y: 0px;
     --video-hero-text-offset-y: 0px;
-    --video-hero-video-max-height: clamp(240px, 40svh, 500px);
+    --video-hero-video-max-height: clamp(220px, 34vh, 360px);
     width: 100%;
-    margin-top: 0;
+    margin: 0;
     padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  .bim-viewport-hero .discipline-marquee {
+    bottom: 0;
   }
 
   .project-grid {
@@ -622,6 +638,13 @@ header .navigation li a,
 
   .row .col50 .imgbx {
     height: auto;
+  }
+}
+
+@media (max-width: 950px) and (min-height: 1000px) {
+  .bim-viewport-hero {
+    min-height: calc(100svh - 170px);
+    padding-bottom: 0;
   }
 }
 

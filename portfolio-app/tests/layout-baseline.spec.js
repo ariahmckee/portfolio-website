@@ -103,37 +103,81 @@ test.describe('known regression tests', () => {
       expect(Math.abs((actual.marqueeLeft ?? 0) - (actual.navLeft ?? 0))).toBeLessThanOrEqual(30)
     })
 
-    test(`hero text does not overlap the marquee at ${viewport.label} (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    test(`hero text does not overlap the marquee and keeps positive separation at ${viewport.label} (${viewport.width}×${viewport.height})`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height })
       await page.goto('/bim-vdc')
 
-      const overlap = await page.evaluate(() => {
+      const metrics = await page.evaluate(() => {
         const hero = document.querySelector('.video-hero__content')
         const marquee = document.querySelector('.discipline-marquee')
-        if (!hero || !marquee) return true
+
+        if (!hero || !marquee) {
+          return {
+            overlap: true,
+            gap: null,
+            heroBottom: null,
+            marqueeTop: null,
+          }
+        }
 
         const heroRect = hero.getBoundingClientRect()
         const marqueeRect = marquee.getBoundingClientRect()
         const intersects = heroRect.left < marqueeRect.right && heroRect.right > marqueeRect.left && heroRect.top < marqueeRect.bottom && heroRect.bottom > marqueeRect.top
-        return intersects
+
+        return {
+          overlap: intersects,
+          gap: Number((marqueeRect.top - heroRect.bottom).toFixed(2)),
+          heroBottom: Number(heroRect.bottom.toFixed(2)),
+          marqueeTop: Number(marqueeRect.top.toFixed(2)),
+        }
       })
 
-      expect(overlap).toBeFalsy()
+      const requiredGap = viewport.width <= 390 ? 24 : 32
+      expect(metrics.overlap).toBeFalsy()
+      expect(metrics.gap).not.toBeNull()
+      expect(metrics.gap).toBeGreaterThanOrEqual(requiredGap)
     })
 
-    test(`marquee stays near the bottom edge of the opening viewport at ${viewport.label} (${viewport.width}×${viewport.height})`, async ({ page }) => {
+    test(`marquee sits at the approved signed bottom spacing at ${viewport.label} (${viewport.width}×${viewport.height})`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height })
       await page.goto('/bim-vdc')
 
       const metrics = await page.evaluate(() => {
         const marquee = document.querySelector('.discipline-marquee')
         const rect = marquee?.getBoundingClientRect()
-        if (!rect) return { distance: null }
-        return { distance: Number((window.innerHeight - rect.bottom).toFixed(2)) }
+
+        if (!rect) {
+          return {
+            distance: null,
+            top: null,
+            bottom: null,
+            innerHeight: window.innerHeight,
+            scrollHeight: document.documentElement.scrollHeight,
+          }
+        }
+
+        return {
+          distance: Number((window.innerHeight - rect.bottom).toFixed(2)),
+          top: Number(rect.top.toFixed(2)),
+          bottom: Number(rect.bottom.toFixed(2)),
+          innerHeight: window.innerHeight,
+          scrollHeight: document.documentElement.scrollHeight,
+        }
       })
 
       expect(metrics.distance).not.toBeNull()
-      expect(Math.abs(metrics.distance ?? 0)).toBeLessThanOrEqual(80)
+      expect(metrics.top).not.toBeNull()
+      expect(metrics.bottom).not.toBeNull()
+      expect(metrics.bottom).toBeLessThanOrEqual(metrics.innerHeight)
+      expect(metrics.top).toBeGreaterThanOrEqual(0)
+
+      const targetDistance = viewport.width <= 390 ? 20 : 30
+      const minDistance = targetDistance - 5
+      const maxDistance = targetDistance + 5
+      expect(metrics.distance).toBeGreaterThanOrEqual(minDistance)
+      expect(metrics.distance).toBeLessThanOrEqual(maxDistance)
+      expect(metrics.distance).toBeGreaterThan(0)
+      expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.innerHeight)
     })
   }
 })
