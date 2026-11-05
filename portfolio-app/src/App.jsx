@@ -1,5 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react'
-import { Route, Routes, useLocation } from 'react-router'
+import { Route, Routes, useLocation, useNavigate } from 'react-router'
 import './App.css'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -17,6 +17,7 @@ const socialLinks = [
 
 function App() {
   const location = useLocation()
+  const navigate = useNavigate()
   const isHomePage = location.pathname === '/'
   const [menuOpen, setMenuOpen] = useState(false)
   const [contactOpen, setContactOpen] = useState(false)
@@ -42,10 +43,53 @@ function App() {
     return () => document.removeEventListener('click', handleDocumentClick)
   }, [])
 
-  const handleNavClick = () => {
-    setMenuOpen(false)
-    setContactOpen(false)
+const scrollToProjects = (behavior = 'smooth') => {
+  const projects = document.getElementById('projects')
+  const navbar = headerBoxRef.current
+
+  if (!projects || !navbar) return
+
+  const targetTop = navbar.getBoundingClientRect().bottom + 12
+
+  const desiredScrollY =
+    window.scrollY +
+    projects.getBoundingClientRect().top -
+    targetTop
+
+  window.scrollTo({
+    top: desiredScrollY,
+    behavior,
+  })
+}
+
+const handleNavClick = (event) => {
+  setMenuOpen(false)
+  setContactOpen(false)
+
+  const href = event.currentTarget.getAttribute('href')
+
+  if (!href?.endsWith('#projects')) return
+
+  event.preventDefault()
+
+  const destination = href.split('#')[0]
+
+  if (location.pathname === destination) {
+    scrollToProjects()
+  } else {
+    navigate(`${destination}#projects`)
   }
+}
+
+useEffect(() => {
+  if (location.hash !== '#projects') return
+
+  const frame = requestAnimationFrame(() => {
+    scrollToProjects('instant')
+  })
+
+  return () => cancelAnimationFrame(frame)
+}, [location.pathname, location.hash])
 
   const handleContactToggle = (event) => {
     event.preventDefault()
