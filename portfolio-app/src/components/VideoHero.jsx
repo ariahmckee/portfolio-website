@@ -11,6 +11,7 @@ export default function VideoHero({
 }) {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
+  const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1200))
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -18,21 +19,36 @@ export default function VideoHero({
     const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches)
     updatePreference()
 
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth)
+      setVideoFailed(false)
+    }
+    handleResize()
+
+    window.addEventListener('resize', handleResize)
+
     if (typeof mediaQuery.addEventListener === 'function') {
       mediaQuery.addEventListener('change', updatePreference)
-      return () => mediaQuery.removeEventListener('change', updatePreference)
+      return () => {
+        mediaQuery.removeEventListener('change', updatePreference)
+        window.removeEventListener('resize', handleResize)
+      }
     }
 
     mediaQuery.addListener(updatePreference)
-    return () => mediaQuery.removeListener(updatePreference)
+    return () => {
+      mediaQuery.removeListener(updatePreference)
+      window.removeEventListener('resize', handleResize)
+    }
   }, [])
 
-  const fallbackSource = useMemo(
-    () => sources.desktop || sources.standard || sources.mobile || '',
-    [sources],
-  )
+  const selectedSource = useMemo(() => {
+    if (viewportWidth >= 1200 && sources.desktop) return sources.desktop
+    if (viewportWidth >= 700 && sources.standard) return sources.standard
+    return sources.mobile || sources.standard || sources.desktop || ''
+  }, [sources, viewportWidth])
 
-  const renderVideo = !videoFailed && Boolean(fallbackSource)
+  const renderVideo = !videoFailed && Boolean(selectedSource)
 
   const mediaPlacementClass = mediaSide === 'right' ? 'video-hero--media-right' : 'video-hero--media-left'
 
@@ -41,19 +57,18 @@ export default function VideoHero({
       <div className="video-hero__media" aria-hidden={renderVideo ? 'false' : 'true'}>
         {renderVideo ? (
           <video
+            key={selectedSource}
             className="video-hero__video"
+            src={selectedSource}
+            type="video/webm"
             autoPlay={!prefersReducedMotion}
             muted
             loop={!prefersReducedMotion}
             playsInline
+            preload="auto"
             poster={poster}
             onError={() => setVideoFailed(true)}
-          >
-            {sources.desktop ? <source src={sources.desktop} type="video/webm" media="(min-width: 1200px)" /> : null}
-            {sources.standard ? <source src={sources.standard} type="video/webm" media="(min-width: 700px)" /> : null}
-            {sources.mobile ? <source src={sources.mobile} type="video/webm" media="(max-width: 699px)" /> : null}
-            <source src={fallbackSource} type="video/webm" />
-          </video>
+          />
         ) : poster ? (
           <img className="video-hero__poster" src={poster} alt={heading || 'Hero media'} />
         ) : null}
